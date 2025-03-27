@@ -1,4 +1,4 @@
-module chat-app
+module github.com/vinothyadav-777/chat-app
 
 go 1.23.4
 
