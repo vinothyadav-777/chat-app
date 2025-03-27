@@ -1,8 +1,8 @@
 package sqs
 
 import (
-	"chat-app/models"
-	"chat-app/utils"
+	"github.com/vinothyadav-777/chat-app/models"
+	"github.com/vinothyadav-777/chat-app/utils"
 	"errors"
 	"fmt"
 	"strconv"
@@ -93,7 +93,7 @@ func (s *Sqs) DeleteBatch(rcvHandles map[string]string) error {
 	return nil
 }
 
-func (s *Sqs) Send(payload string, delay int64) (string, error) {
+func (s *Sqs) Send(payload string, delay int64) error {
 	sentTimeStamp := strconv.FormatInt(time.Now().Unix(), 10)
 	DataType := "String"
 	messageAttr := sqs.MessageAttributeValue{StringValue: &sentTimeStamp, DataType: &DataType}
@@ -106,12 +106,12 @@ func (s *Sqs) Send(payload string, delay int64) (string, error) {
 		MessageAttributes: messageAttrMap,
 	})
 	if res == nil || res.MessageId == nil {
-		return "", err
+		return err
 	}
-	return *res.MessageId, err
+	return err
 }
 
-func (s *Sqs) SendBatch(payloads []string, delay int64) ([]string, error) {
+func (s *Sqs) SendBatch(payloads []string, delay int64) error {
 	var inputs []*sqs.SendMessageBatchRequestEntry
 	for _, payload := range payloads {
 		id := utils.GetNuid()
@@ -137,7 +137,7 @@ func (s *Sqs) SendBatch(payloads []string, delay int64) ([]string, error) {
 	res, err := s.client.SendMessageBatch(&req)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 	var ackIds []string
 	for _, obj := range res.Successful {
@@ -146,10 +146,10 @@ func (s *Sqs) SendBatch(payloads []string, delay int64) ([]string, error) {
 	for _, obj := range res.Failed {
 		if obj.Message != nil {
 			if *obj.Message != "" {
-				return ackIds, errors.New(*obj.Message)
+				return errors.New(*obj.Message)
 			}
 		}
 	}
-	return ackIds, nil
+	return nil
 
 }

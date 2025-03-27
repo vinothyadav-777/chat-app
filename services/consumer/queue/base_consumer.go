@@ -7,10 +7,10 @@ import (
 	"sync"
 	"time"
 
-	"chat-app/constants"
-	"chat-app/models"
-	"chat-app/services/consumer"
-	config "chat-app/utils"
+	"github.com/vinothyadav-777/chat-app/constants"
+	"github.com/vinothyadav-777/chat-app/models"
+	"github.com/vinothyadav-777/chat-app/services/consumer"
+	config "github.com/vinothyadav-777/chat-app/utils"
 	log "github.com/sirupsen/logrus"
 )
 

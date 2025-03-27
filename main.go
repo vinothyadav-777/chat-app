@@ -1,16 +1,18 @@
 package main
 
 import (
-	"chat-app/constants"
-	"chat-app/queues/rabbitmq"
-	_ "chat-app/queues/sqs"
-	"chat-app/services/consumer"
-	"chat-app/services/consumer/queue"
-	config "chat-app/utils"
 	"context"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/vinothyadav-777/chat-app/config/flags"
+	"github.com/vinothyadav-777/chat-app/constants"
+	"github.com/vinothyadav-777/chat-app/externals/queues/rabbitmq"
+	_ "github.com/vinothyadav-777/chat-app/externals/queues/sqs"
+	"github.com/vinothyadav-777/chat-app/services/consumer"
+	"github.com/vinothyadav-777/chat-app/services/consumer/queue"
+	config "github.com/vinothyadav-777/chat-app/utils"
 
 	log "github.com/sirupsen/logrus"
 )

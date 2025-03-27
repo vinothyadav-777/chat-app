@@ -1,9 +1,9 @@
 package consumer
 
 import (
-	"chat-app/models"
-	"chat-app/queues"
-	"chat-app/utils"
+	"github.com/vinothyadav-777/chat-app/externals/queues"
+	"github.com/vinothyadav-777/chat-app/models"
+	"github.com/vinothyadav-777/chat-app/utils"
 )
 
 type QueueService struct {
@@ -27,7 +27,7 @@ func (queueService *QueueService) DeleteBatch(payloads []models.Message) error {
 	return nil
 }
 
-func (queueService *QueueService) Send(payload string, delay int64) (string, error) {
+func (queueService *QueueService) Send(payload string, delay int64) error {
 	return queueService.consumer.Send(payload, delay)
 }
 
@@ -35,16 +35,14 @@ func (queueService *QueueService) Receive() ([]models.Message, error) {
 	return queueService.consumer.Receive()
 }
 
-func (queueService *QueueService) SendBatch(payloads []string, delay int64) ([]string, error) {
+func (queueService *QueueService) SendBatch(payloads []string, delay int64) error {
 	//Splitting the queue payload because SQS doesn't allow more than 10 batch publish
 	splittedPayloads := utils.SplitIntoSizedChunks(10, payloads)
-	var result []string
 	for _, sizedPayload := range splittedPayloads {
-		resultTemp, err := queueService.consumer.SendBatch(sizedPayload, delay)
-		result = append(result, resultTemp...)
+		err := queueService.consumer.SendBatch(sizedPayload, delay)
 		if err != nil {
-			return result, err
+			return err
 		}
 	}
-	return result, nil
+	return nil
 }

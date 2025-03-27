@@ -1,13 +1,13 @@
 package history
 
 import (
-	"chat-app/entities"
-	"chat-app/entities/repositories/chat_history"
+	"github.com/vinothyadav-777/chat-app/entities"
+	"github.com/vinothyadav-777/chat-app/entities/repositories/chat_history"
 	"context"
 	"time"
 
-	"chat-app/constants"
-	config "chat-app/utils"
+	"github.com/vinothyadav-777/chat-app/constants"
+	config "github.com/vinothyadav-777/chat-app/utils"
 	log "github.com/sirupsen/logrus"
 )
 

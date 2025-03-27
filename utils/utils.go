@@ -2,7 +2,7 @@ package utils
 
 import (
 	"bytes"
-	"chat-app/constants"
+	"github.com/vinothyadav-777/chat-app/constants"
 	"encoding/json"
 	"strings"
 

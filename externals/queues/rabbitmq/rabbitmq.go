@@ -1,7 +1,7 @@
 package rabbitmq
 
 import (
-	"chat-app/models"
+	"github.com/vinothyadav-777/chat-app/models"
 	"fmt"
 	"log"
 	"strconv"
@@ -103,7 +103,7 @@ func (r *RabbitMQ) DeleteMessage(deliveryTag uint64) error {
 	return nil
 }
 
-func (r *RabbitMQ) Send(payload string, delay time.Duration) error {
+func (r *RabbitMQ) Send(payload string, delay int64) error {
 	// Send the message to the queue
 	err := r.channel.Publish(
 		"",           // exchange
@@ -114,7 +114,7 @@ func (r *RabbitMQ) Send(payload string, delay time.Duration) error {
 			ContentType:  "text/plain",
 			Body:         []byte(payload),
 			DeliveryMode: amqp.Persistent, // Make the message persistent
-			Expiration:   fmt.Sprintf("%d", int64(delay/time.Millisecond)),
+			Expiration:   fmt.Sprintf("%d", delay/int64(time.Millisecond)),
 		},
 	)
 	if err != nil {
@@ -123,7 +123,7 @@ func (r *RabbitMQ) Send(payload string, delay time.Duration) error {
 	return nil
 }
 
-func (r *RabbitMQ) SendBatch(payloads []string, delay time.Duration) error {
+func (r *RabbitMQ) SendBatch(payloads []string, delay int64) error {
 	for _, payload := range payloads {
 		err := r.Send(payload, delay)
 		if err != nil {

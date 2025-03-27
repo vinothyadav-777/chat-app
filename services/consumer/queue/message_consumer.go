@@ -1,16 +1,16 @@
 package queue
 
 import (
-	"chat-app/constants"
-	"chat-app/provider/history"
-	"chat-app/services/consumer"
+	"github.com/vinothyadav-777/chat-app/constants"
+	"github.com/vinothyadav-777/chat-app/provider/history"
+	"github.com/vinothyadav-777/chat-app/services/consumer"
 	"context"
 	"errors"
 	"time"
 
-	"chat-app/models"
+	"github.com/vinothyadav-777/chat-app/models"
 
-	"chat-app/utils"
+	"github.com/vinothyadav-777/chat-app/utils"
 
 	log "github.com/sirupsen/logrus"
 )

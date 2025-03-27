@@ -1,8 +1,8 @@
 package history
 
 import (
-	"chat-app/entities"
-	"chat-app/entities/repositories/chat_history"
+	"github.com/vinothyadav-777/chat-app/entities"
+	"github.com/vinothyadav-777/chat-app/entities/repositories/chat_history"
 	"context"
 )
 

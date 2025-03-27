@@ -1,5 +1,5 @@
 package repositories
 
-import database_nosql "chat-app/externals/database/nosql/mongodb"
+import database_nosql "github.com/vinothyadav-777/chat-app/externals/database/nosql/mongodb"
 
 var DB = database_nosql.Get

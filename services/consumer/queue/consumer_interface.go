@@ -1,7 +1,7 @@
 package queue
 
 import (
-	"chat-app/models"
+	"github.com/vinothyadav-777/chat-app/models"
 	"context"
 )
 

@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"time"
 
-	"chat-app/entities"
-	"chat-app/entities/repositories/chat_history"
-	"chat-app/models"
-	"chat-app/provider/history"
+	"github.com/vinothyadav-777/chat-app/entities"
+	"github.com/vinothyadav-777/chat-app/entities/repositories/chat_history"
+	"github.com/vinothyadav-777/chat-app/models"
+	"github.com/vinothyadav-777/chat-app/provider/history"
 
 	"github.com/go-redis/redis/v8"
 	log "github.com/sirupsen/logrus"
