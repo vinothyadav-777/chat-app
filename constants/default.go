@@ -14,3 +14,5 @@ const (
 	Equal                    = "="
 	Html                     = "html"
 )
+
+const TimeZone = "Asia/Kolkata"

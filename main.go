@@ -10,6 +10,7 @@ import (
 	"context"
 	"os"
 	"strings"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -72,4 +73,12 @@ func initSQSConsumer(consumerType string) (*consumer.QueueService, queue.SQSCons
 		}
 	}
 	return nil, nil
+}
+
+func loadLocalLocation() *time.Location {
+	loc, err := time.LoadLocation(constants.TimeZone)
+	if err != nil {
+		log.Fatalln("Error in Load Local Location")
+	}
+	return loc
 }
