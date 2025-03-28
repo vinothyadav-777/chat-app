@@ -6,21 +6,19 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vinothyadav-777/chat-app/config/flags"
 	"github.com/vinothyadav-777/chat-app/constants"
 	"github.com/vinothyadav-777/chat-app/externals/queues/rabbitmq"
 	_ "github.com/vinothyadav-777/chat-app/externals/queues/sqs"
 	"github.com/vinothyadav-777/chat-app/services/consumer"
-	"github.com/vinothyadav-777/chat-app/services/consumer/queue"
-	config "github.com/vinothyadav-777/chat-app/utils"
+	"github.com/vinothyadav-777/chat-app/services/queue"
+	"github.com/vinothyadav-777/chat-app/websocket"
 
 	log "github.com/sirupsen/logrus"
 )
 
 func main() {
-	ctx := context.Background()
+	_ = context.Background()
 
-	initConfigs(ctx)
 	//logger.InitializeLogger(constants.DefaultLogLevel)
 	consumerType := os.Getenv(constants.ConsumerType)
 	constants.Consumer = consumerType
@@ -28,29 +26,22 @@ func main() {
 	log.Infoln("Initializing consumer for !!!!!!!!!!!!!!!!!!!!!!!!!", consumerType)
 	switch consumerType {
 	case "message_consumer":
-		initSqsConsumer(consumerType)
+		initQueueConsumer(consumerType)
 	case "history":
+		panic("history queue not yet implemented")
 	case "retry":
-		initSqsConsumer(consumerType)
+		panic("retry queue not yet implemented")
 	default:
 		log.Fatal("In correct Consumer type ", consumerType)
 	}
-
 }
 
-func initConfigs(ctx context.Context) {
-	err := config.InitConfigs(flags.BaseConfigPath(), constants.ApplicationConfig, constants.DatabaseConfig)
-	if err != nil {
-		log.Fatal("error loading configs", err)
-	}
+func initQueueConsumer(consumerType string) {
+	queueService, consumerService := initQueueConsumers(consumerType)
+	consumer.BeginProcessing(queueService, consumerService)
 }
 
-func initSqsConsumer(consumerType string) {
-	queueService, consumerService := initSQSConsumer(consumerType)
-	queue.BeginProcessing(queueService, consumerService)
-}
-
-func initSQSConsumer(consumerType string) (*consumer.QueueService, queue.SQSConsumer) {
+func initQueueConsumers(consumerType string) (*queue.QueueService, consumer.QueueConsumer) {
 
 	queueURL := os.Getenv("SQS_" + strings.ToUpper(consumerType))
 	retryQueueUrl := os.Getenv("SQS_RETRY")
@@ -66,8 +57,8 @@ func initSQSConsumer(consumerType string) (*consumer.QueueService, queue.SQSCons
 			log.Fatal("Error in initializing queue ", queueURL, consumerType)
 		}
 
-		consumerService := consumer.GetQueueService(queueProvider)
-		messageConsumer := queue.GetMessageConsumer(nil, consumerService, consumerService)
+		consumerService := queue.GetQueueService(queueProvider)
+		messageConsumer := consumer.GetMessageConsumer(nil, consumerService, consumerService)
 		return consumerService, messageConsumer
 
 	default:
@@ -83,4 +74,11 @@ func loadLocalLocation() *time.Location {
 		log.Fatalln("Error in Load Local Location")
 	}
 	return loc
+}
+
+func initQueue() {
+	queueName := ""
+	queueUrl := os.Getenv(constants.MessageQueue)
+	queueProvider, _ := rabbitmq.GetRabbitMQClient(queueUrl, queueName) //queueProvider
+	websocket.QueueService = queue.GetQueueService(queueProvider)
 }

@@ -16,3 +16,8 @@ var (
 	Consumer      string
 	LocalLocation *time.Location
 )
+
+const (
+	MessageProcessingTimeoutInMilli        = 5000
+	HistorySaveRecordsDBCallTimeoutInMilli = 5000
+)

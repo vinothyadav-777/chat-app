@@ -1,11 +1,11 @@
-package queue
+package consumer
 
 import (
-	"github.com/vinothyadav-777/chat-app/models"
 	"context"
+	"github.com/vinothyadav-777/chat-app/models"
 )
 
-type SQSConsumer interface {
+type QueueConsumer interface {
 	ProcessMessage(ctx context.Context, message models.Message) (bool, error)
 	ProcessBulkMessage(ctx context.Context, message []models.Message) (bool, interface{}, error)
 	GetConsumerName() string

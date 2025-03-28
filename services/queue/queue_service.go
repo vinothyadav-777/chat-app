@@ -1,4 +1,4 @@
-package consumer
+package queue
 
 import (
 	"github.com/vinothyadav-777/chat-app/externals/queues"

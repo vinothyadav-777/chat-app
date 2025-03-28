@@ -1,14 +1,14 @@
 package history
 
 import (
-	"github.com/vinothyadav-777/chat-app/entities"
-	"github.com/vinothyadav-777/chat-app/entities/repositories/chat_history"
 	"context"
 	"time"
 
-	"github.com/vinothyadav-777/chat-app/constants"
-	config "github.com/vinothyadav-777/chat-app/utils"
+	"github.com/vinothyadav-777/chat-app/entities"
+	"github.com/vinothyadav-777/chat-app/entities/repositories/chat_history"
+
 	log "github.com/sirupsen/logrus"
+	"github.com/vinothyadav-777/chat-app/constants"
 )
 
 type HistoryProvider struct {
@@ -29,7 +29,7 @@ func (provider *HistoryProvider) SaveHistory(ctx context.Context, ChatHistoryRep
 		timeout = time.Until(deadline)
 	} else {
 		// Fallback to a default timeout if no deadline is set
-		timeout = time.Duration(config.GetClient().GetIntD(constants.DatabaseConfig, constants.HistorySaveRecordsDBCallTimeout, 2000)) * time.Millisecond
+		timeout = time.Duration(constants.HistorySaveRecordsDBCallTimeoutInMilli) * time.Millisecond
 	}
 
 	// Create a new context with the timeout

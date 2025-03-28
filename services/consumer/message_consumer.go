@@ -1,9 +1,9 @@
-package queue
+package consumer
 
 import (
 	"github.com/vinothyadav-777/chat-app/constants"
 	"github.com/vinothyadav-777/chat-app/provider/history"
-	"github.com/vinothyadav-777/chat-app/services/consumer"
+	"github.com/vinothyadav-777/chat-app/services/queue"
 	"context"
 	"errors"
 	"time"
@@ -17,10 +17,10 @@ import (
 
 type MessageConsumer struct {
 	provider      *history.Provider
-	ConsumerQueue *consumer.QueueService
+	ConsumerQueue *queue.QueueService
 }
 
-func GetMessageConsumer(provider *history.Provider, consumerQueue *consumer.QueueService, retryQueue *consumer.QueueService) *MessageConsumer {
+func GetMessageConsumer(provider *history.Provider, consumerQueue *queue.QueueService, retryQueue *queue.QueueService) *MessageConsumer {
 	return &MessageConsumer{provider, consumerQueue}
 }
 

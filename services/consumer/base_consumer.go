@@ -1,28 +1,27 @@
-package queue
+package consumer
 
 import (
 	"context"
 	"fmt"
 	"os"
+	"strconv"
 	"sync"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/vinothyadav-777/chat-app/constants"
 	"github.com/vinothyadav-777/chat-app/models"
-	"github.com/vinothyadav-777/chat-app/services/consumer"
-	config "github.com/vinothyadav-777/chat-app/utils"
-	log "github.com/sirupsen/logrus"
+	"github.com/vinothyadav-777/chat-app/services/queue"
 )
 
-func BeginProcessing(queueService *consumer.QueueService, consumer SQSConsumer) {
+func BeginProcessing(queueService *queue.QueueService, consumer QueueConsumer) {
 	consumerType := os.Getenv(constants.ConsumerType)
-	bufferLengthMap, err := config.GetClient().GetMap(constants.ApplicationConfig, constants.ConsumerBufferLength)
+	bufferLength, err := strconv.Atoi(os.Getenv(constants.BufferLength))
 	if err != nil {
-		log.Fatalln("Error while getting ConsumerBufferLength config: err", err)
+		panic(fmt.Sprintf("error getting bufferlength: %v", err))
 	}
-	bufferLength := int(bufferLengthMap[consumerType].(float64))
 	buffer := make(chan models.Message, bufferLength)
-	log.WithField("bufferLenght", bufferLength).WithField("consumerType", consumerType).Infoln("Buffer Length")
+	log.WithField("bufferLength", bufferLength).WithField("consumerType", consumerType).Infoln("Buffer Length")
 	if bufferLength != 0 {
 		BeginProcessingBuffer(buffer, queueService, consumer, int64(bufferLength))
 	}
@@ -43,14 +42,12 @@ func BeginProcessing(queueService *consumer.QueueService, consumer SQSConsumer) 
 	}
 }
 
-func BeginBulkProcessing(queueService *consumer.QueueService, consumer SQSConsumer) {
+func BeginBulkProcessing(queueService *queue.QueueService, consumer QueueConsumer) {
 
-	consumerType := os.Getenv(constants.ConsumerType)
-	bufferLengthMap, err := config.GetClient().GetMap(constants.ApplicationConfig, constants.ConsumerBufferLength)
+	bufferLength, err := strconv.Atoi(os.Getenv(constants.BufferLength))
 	if err != nil {
-		log.Fatalln("Error while getting ConsumerBufferLength config: err", err)
+		panic(fmt.Sprintf("error getting bufferlength: %v", err))
 	}
-	bufferLength := int(bufferLengthMap[consumerType].(float64))
 	buffer := make(chan []models.Message, bufferLength)
 	if bufferLength != 0 {
 		BeginBulkProcessingBuffer(buffer, queueService, consumer, int64(bufferLength))
@@ -69,7 +66,7 @@ func BeginBulkProcessing(queueService *consumer.QueueService, consumer SQSConsum
 	}
 }
 
-func BeginProcessingBuffer(buffer chan models.Message, queueService *consumer.QueueService, consumer SQSConsumer, bufferLength int64) {
+func BeginProcessingBuffer(buffer chan models.Message, queueService *queue.QueueService, consumer QueueConsumer, bufferLength int64) {
 	go ConsumeMessage(buffer, queueService, consumer, bufferLength)
 	for {
 		payloads, err := queueService.Receive()
@@ -87,7 +84,7 @@ func BeginProcessingBuffer(buffer chan models.Message, queueService *consumer.Qu
 	}
 }
 
-func BeginBulkProcessingBuffer(buffer chan []models.Message, queueService *consumer.QueueService, consumer SQSConsumer, bufferLength int64) {
+func BeginBulkProcessingBuffer(buffer chan []models.Message, queueService *queue.QueueService, consumer QueueConsumer, bufferLength int64) {
 	go ConsumeBulkMessage(buffer, queueService, consumer, bufferLength)
 	for {
 		payloads, err := queueService.Receive()
@@ -104,7 +101,7 @@ func BeginBulkProcessingBuffer(buffer chan []models.Message, queueService *consu
 	}
 }
 
-func ConsumeMessage(buffer chan models.Message, queueService *consumer.QueueService, consumerService SQSConsumer, bufferLength int64) {
+func ConsumeMessage(buffer chan models.Message, queueService *queue.QueueService, consumerService QueueConsumer, bufferLength int64) {
 	for {
 		wg := &sync.WaitGroup{}
 		var i int64
@@ -117,7 +114,7 @@ func ConsumeMessage(buffer chan models.Message, queueService *consumer.QueueServ
 	}
 }
 
-func ConsumeBulkMessage(buffer chan []models.Message, queueService *consumer.QueueService, consumerService SQSConsumer, bufferLength int64) {
+func ConsumeBulkMessage(buffer chan []models.Message, queueService *queue.QueueService, consumerService QueueConsumer, bufferLength int64) {
 	for {
 		wg := &sync.WaitGroup{}
 		var i int64
@@ -130,10 +127,9 @@ func ConsumeBulkMessage(buffer chan []models.Message, queueService *consumer.Que
 	}
 }
 
-func parallelProcessing(payloads models.Message, queueService *consumer.QueueService, consumer SQSConsumer, wg *sync.WaitGroup) {
+func parallelProcessing(payloads models.Message, queueService *queue.QueueService, consumer QueueConsumer, wg *sync.WaitGroup) {
 	defer wg.Done()
-	timeout := config.GetClient().GetIntD(constants.ApplicationConfig, constants.MessageProcessingTimeoutInMilli, 5000)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(constants.MessageProcessingTimeoutInMilli)*time.Millisecond)
 	defer cancel()
 	result := make(chan string)
 	go func() {
@@ -154,12 +150,12 @@ func parallelProcessing(payloads models.Message, queueService *consumer.QueueSer
 	}
 }
 
-func parallelBulkProcessing(payloads []models.Message, queueService *consumer.QueueService, consumer SQSConsumer, wg *sync.WaitGroup) {
+func parallelBulkProcessing(payloads []models.Message, queueService *queue.QueueService, consumer QueueConsumer, wg *sync.WaitGroup) {
 	defer wg.Done()
 	ProcessBulkMessage(payloads, queueService, consumer)
 }
 
-func ProcessMessage(payload models.Message, queueService *consumer.QueueService, consumer SQSConsumer) {
+func ProcessMessage(payload models.Message, queueService *queue.QueueService, consumer QueueConsumer) {
 	ctx := context.Background()
 	deleteFromQueue, err := consumer.ProcessMessage(ctx, payload)
 	if deleteFromQueue {
@@ -172,7 +168,7 @@ func ProcessMessage(payload models.Message, queueService *consumer.QueueService,
 	}
 }
 
-func ProcessBulkMessage(payloads []models.Message, queueService *consumer.QueueService, consumer SQSConsumer) {
+func ProcessBulkMessage(payloads []models.Message, queueService *queue.QueueService, consumer QueueConsumer) {
 	ctx := context.Background()
 	deleteFromQueue, _, err := consumer.ProcessBulkMessage(ctx, payloads)
 	if deleteFromQueue {
